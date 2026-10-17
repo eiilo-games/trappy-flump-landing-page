@@ -19,6 +19,9 @@ audio/         generated sounds (do not edit; built by assets/audio/ in the trap
 favicon.svg    the head sprite, generated from the same grid as the game
 title.svg      the header title, rendered from the game's 3x5 font by tools/title.js
 app-ads.txt    AdMob authorised-seller line; must be served at the domain root
+sitemap.xml    every current page for search engines (see SEO below)
+robots.txt     allows everything and points at the sitemap
+img/           share image, app icon and screenshots (from the trappy-flump repo's store/)
 test/soak.js   headless soak test of game.js (see below)
 .nojekyll      tells GitHub Pages to serve the files verbatim
 ```
@@ -90,16 +93,46 @@ hit, or achievements do not persist.
 Keep every version that was ever live:
 
 1. Copy `privacy.html` to `privacy-<old effective date>.html`, then in the
-   copy add `<meta name="robots" content="noindex">`, drop
+   copy add `<meta name="robots" content="noindex">`, delete the
+   `canonical` link and the Open Graph / Twitter tags, drop
    `aria-current` from the Privacy nav link, mark the date as archived
    ("Archived: effective <from> to <day before the new date>") and add the
    "This is an old version" line under the heading pointing back to
    `privacy.html`.
 2. Edit `privacy.html`, set the new effective date at the top, and add a
    row to the table under "Changes and past versions" linking the archived
-   file.
+   file. Bump its `lastmod` in `sitemap.xml`; the archived file stays out.
 3. Publish it before the app version that needs it ships, and update the
    Play Data safety form to match.
+
+## SEO
+
+Every indexable page (`index.html`, `privacy.html`) has a title that says
+what it is, a description, a canonical URL on `https://trappyflump.com/`, and
+Open Graph and Twitter card tags. `index.html` also has JSON-LD (`WebSite`,
+`Organization` and a `VideoGame` + `MobileApplication` for the app).
+`sitemap.xml` lists those two pages, with the share image, icon and
+screenshots as image entries on the home page; bump a page's `lastmod` when
+you change it. Archived policy versions are `noindex` and stay out of it.
+
+The share image `img/social.png` is the Play feature graphic scaled up with
+nearest-neighbour and cropped to 1200x630; `img/icon.png` and
+`img/shots/` are copies of the store icon and screenshots. Regenerate them
+when the store assets change, with the `trappy-flump` repository checked out
+next to this one:
+
+```sh
+magick ../trappy-flump/store/general/feature_graphic.png -filter point \
+	-resize x630 -gravity center -crop 1200x630+0+0 +repage -strip img/social.png
+magick ../trappy-flump/store/general/icon_512.png -strip img/icon.png
+for f in 2_play 3_breaking_news 4_war 7_game_over; do
+	magick ../trappy-flump/store/screenshots/$f.png -strip img/shots/${f#?_}.png
+done
+```
+
+After the first deploy, add the domain to Google Search Console, submit
+`https://trappyflump.com/sitemap.xml` and check the home page with the Rich
+Results Test.
 
 ## Audio
 
